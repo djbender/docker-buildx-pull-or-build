@@ -1,0 +1,17 @@
+name: Test
+
+on: push
+
+jobs:
+  Test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Run action
+        uses: ./
+        with:
+          docker_username: djbender
+          docker_password: ${{ secrets.DOCKER_PASSWORD }}
+          image: djbender/docker-buildx-pull-or-build-test-dockerfile
+          dockerfile: test.Dockerfile

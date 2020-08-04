@@ -1,0 +1,17 @@
+name: Verify Release
+
+on: release
+
+jobs:
+  verify-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Docker Buildx Pull or Build
+        uses: djbender/docker-buildx-pull-or-build@v0.1
+        with:
+          docker_username: djbender
+          docker_password: ${{ secrets.DOCKER_PASSWORD }}
+          image: djbender/docker-buildx-pull-or-build-test-dockerfile
+          dockerfile: test.Dockerfile

@@ -1,0 +1,35 @@
+name: 'Docker Buildx Pull or Build'
+description: 'Pull an image or optionally build it with buildx'
+
+inputs:
+  docker_username:
+    description: 'The username to authenticate with the registry.'
+    require: true
+  docker_password:
+    description: 'The password to authenticate with the registry.'
+    require: true
+  docker_registry:
+    decscription: 'The remote registry for pulling and pushing images.'
+  image:
+    description: 'The image name that this action will either 1) pull 2) build and push.'
+    required: true
+  dockerfile:
+    description: 'The Dockerfile to build when the remote image is not available.'
+    required: true
+  image_cache:
+    description: 'Optionally specify an image cache name. Default: `<image>:cache`'
+
+outputs:
+  image_id:
+    description: 'Image ID'
+
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+  args:
+    - ${{ inputs.docker_username }}
+    - ${{ inputs.docker_password }}
+    - ${{ inputs.docker_registry }}
+    - ${{ inputs.image }}
+    - ${{ inputs.dockerfile }}
+    - ${{ inputs.image_cache }}

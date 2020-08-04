@@ -1,0 +1,3 @@
+# -P ubuntu-latest=djbender/act-environments-ubuntu:18.04
+--env-file .test.env
+--secret-file .test.secrets
