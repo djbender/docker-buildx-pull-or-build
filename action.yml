@@ -10,14 +10,17 @@ inputs:
     require: true
   docker_registry:
     decscription: 'The remote registry for pulling and pushing images.'
-  image:
-    description: 'The image name that this action will either 1) pull 2) build and push.'
-    required: true
   dockerfile:
     description: 'The Dockerfile to build when the remote image is not available.'
     required: true
+  image:
+    description: 'The image name that this action will either 1) pull 2) build and push.'
+    required: true
   image_cache:
     description: 'Optionally specify an image cache name. Default: `<image>:cache`'
+  living_tag:
+    description: "Skip the initial `docker pull` because this tag is not immutable (i.e.: `latest`, `stable-1.0`). Deafult: `'false'`"
+    default: false
 
 outputs:
   image_id:
@@ -27,9 +30,10 @@ runs:
   using: 'docker'
   image: 'Dockerfile'
   args:
-    - ${{ inputs.docker_username }}
     - ${{ inputs.docker_password }}
     - ${{ inputs.docker_registry }}
-    - ${{ inputs.image }}
+    - ${{ inputs.docker_username }}
     - ${{ inputs.dockerfile }}
+    - ${{ inputs.image }}
     - ${{ inputs.image_cache }}
+    - ${{ inputs.living_tag }}

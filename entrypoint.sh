@@ -2,14 +2,16 @@
 
 set -o errexit
 
-DOCKER_USERNAME=$1
-DOCKER_PASSWORD=$2
-DOCKER_REGISTRY=$3
-image=$4
-dockerfile=$5
+DOCKER_PASSWORD=$1
+DOCKER_REGISTRY=$2
+DOCKER_USERNAME=$3
+dockerfile=$4
+image=$5
 
 default_image_cache="$image:cache"
 image_cache=${6:-$default_image_cache}
+
+living_tag=$7
 
 # act will by default change $HOME to /github/home which
 # is not where the buildx cli-plugin is located
@@ -34,7 +36,7 @@ docker buildx install
 echo ::debug:: Builder creation succeeded!
 
 echo ::debug:: pulling "$image" ...
-if docker pull -q "$image" > /dev/null; then
+if [ "$living_tag" != 'true' ] && docker pull -q "$image" > /dev/null; then
   echo ::debug:: image fetch succeeded!
 else
   echo ::debug:: remote image "$image" was not available, starting image build...

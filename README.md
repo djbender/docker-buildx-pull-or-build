@@ -28,6 +28,10 @@ The remote registry for pulling and pushing images. Default: `''` (hub.docker.co
 
 Optionally specify an image cache name. Default: `<image>:cache`
 
+### `living_tag`
+
+Optionally skip the initial `docker pull` because this tag is not immutable (i.e.: `latest`, `stable-1.0`). Default: `'false'`"
+
 ## Outputs
 
 ### `image_id`
