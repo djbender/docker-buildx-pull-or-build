@@ -32,6 +32,10 @@ Optionally specify an image cache name. Default: `<image>:cache`
 
 Optionally skip the initial `docker pull` because this tag is not immutable (i.e.: `latest`, `stable-1.0`). Default: `'false'`"
 
+### `tags`
+
+A list of comma-separated tags to publish to when the resulting image is created. Example: `'latest,stable-1.0,${{ github.sha }}'`. Default: `'latest'`"
+
 ## Outputs
 
 ### `image_id`

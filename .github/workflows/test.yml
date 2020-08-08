@@ -9,12 +9,15 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: Run action
+        id: run
         uses: ./
         with:
-          docker_username: djbender
           docker_password: ${{ secrets.DOCKER_PASSWORD }}
-          image: djbender/docker-buildx-pull-or-build-test-dockerfile
+          docker_username: djbender
           dockerfile: test.Dockerfile
+          image: djbender/docker-buildx-pull-or-build-test-dockerfile
+
+      - run: echo ${{ steps.run.outputs.image_id }}
 
   living-tag:
     runs-on: ubuntu-latest
@@ -22,30 +25,59 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: Run action living_tag  `true`
+        id: run_1
         uses: ./
         with:
-          docker_username: djbender
           docker_password: ${{ secrets.DOCKER_PASSWORD }}
-          image: djbender/docker-buildx-pull-or-build-test-dockerfile:living-tag-1
-          image_cache: djbender/docker-buildx-pull-or-build-test-dockerfile:living-tag-cache
+          docker_username: djbender
           dockerfile: test.Dockerfile
+          image: djbender/docker-buildx-pull-or-build-test-dockerfile
+          image_cache: djbender/docker-buildx-pull-or-build-test-dockerfile:living-tag-cache
           living_tag: true
+          tags: living-tag-1
+
+      - run: echo ${{ steps.run_1.outputs.image_id }}
 
       - name: Run action living_tag `false`
+        id: run_2
         uses: ./
         with:
-          docker_username: djbender
           docker_password: ${{ secrets.DOCKER_PASSWORD }}
-          image: djbender/docker-buildx-pull-or-build-test-dockerfile:living-tag-2
-          image_cache: djbender/docker-buildx-pull-or-build-test-dockerfile:living-tag-cache
+          docker_username: djbender
           dockerfile: test.Dockerfile
+          image: djbender/docker-buildx-pull-or-build-test-dockerfile
+          image_cache: djbender/docker-buildx-pull-or-build-test-dockerfile:living-tag-cache
           living_tag: false
+          tags: living-tag-2
+
+      - run: echo ${{ steps.run_2.outputs.image_id }}
 
       - name: Run action living_tag omitted
+        id: run_3
         uses: ./
         with:
-          docker_username: djbender
           docker_password: ${{ secrets.DOCKER_PASSWORD }}
-          image: djbender/docker-buildx-pull-or-build-test-dockerfile:living-tag-3
-          image_cache: djbender/docker-buildx-pull-or-build-test-dockerfile:living-tag-cache
+          docker_username: djbender
           dockerfile: test.Dockerfile
+          image: djbender/docker-buildx-pull-or-build-test-dockerfile
+          image_cache: djbender/docker-buildx-pull-or-build-test-dockerfile:living-tag-cache
+          tags: living-tag-3
+
+      - run: echo ${{ steps.run_3.outputs.image_id }}
+
+  multiple-tags:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Run action
+        id: run
+        uses: ./
+        with:
+          docker_password: ${{ secrets.DOCKER_PASSWORD }}
+          docker_username: djbender
+          dockerfile: test.Dockerfile
+          image: djbender/docker-buildx-pull-or-build-test-dockerfile
+          tags: multiple-tags-1,multiple-tags-2
+
+      - run: echo ${{ steps.run.outputs.image_id }}

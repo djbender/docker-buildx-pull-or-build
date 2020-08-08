@@ -1,6 +1,6 @@
 #!/bin/sh -l
 
-set -o errexit
+set -o errexit -o nounset
 
 DOCKER_PASSWORD=$1
 DOCKER_REGISTRY=$2
@@ -12,6 +12,8 @@ default_image_cache="$image:cache"
 image_cache=${6:-$default_image_cache}
 
 living_tag=$7
+
+tags=${8:-latest}
 
 # act will by default change $HOME to /github/home which
 # is not where the buildx cli-plugin is located
@@ -35,24 +37,54 @@ docker buildx create --name builder --driver docker-container --use > /dev/null
 docker buildx install
 echo ::debug:: Builder creation succeeded!
 
-echo ::debug:: pulling "$image" ...
-if [ "$living_tag" != 'true' ] && docker pull -q "$image" > /dev/null; then
-  echo ::debug:: image fetch succeeded!
+IFS=,
+
+# get the first element in $tags
+for t in $tags; do tag=$t; break; done
+
+tagged_image_array=''
+tag_args=''
+for t in $tags; do
+  tagged_image_array="${tagged_image_array:+${tagged_image_array},}$image:$t"
+  tag_args="${tag_args:+${tag_args} }--tag $image:$t"
+done
+
+unset IFS
+
+if [ "$living_tag" = 'true' ]; then
+  echo ::debug:: Option living_tag was true so skip check with registry to see if image already exists!
+  build_and_push=true
 else
-  echo ::debug:: remote image "$image" was not available, starting image build...
+  echo ::debug:: Using first tag to see if image already exists: "$tag"
+  if docker pull -q "$image:${tag}" > /dev/null; then
+    echo ::debug:: image fetch succeeded!
+    build_and_push=false
+  else
+    echo ::debug:: remote image "$image:$tag" was not available, starting image build...
+    build_and_push=true
+  fi
+fi
+
+if [ "$build_and_push" = 'true' ]; then
+  # shellcheck disable=SC2086
   docker buildx build \
     --cache-from "type=registry,ref=$image_cache" \
     --cache-to "type=registry,ref=$image_cache,mode=max" \
     --file "$dockerfile" \
     --load \
     --progress=plain \
-    --tag "$image" \
+    ${tag_args} \
     "$GITHUB_WORKSPACE"
   echo ::debug:: image build succeeded!
 
-  echo ::debug:: pushing image...
-  docker push "$image"
-  echo ::debug:: image push succeeded!
+  echo ::debug:: pushing images...
+  IFS=,
+  for tagged_image in $tagged_image_array; do
+    docker push "$tagged_image"
+  done
+  unset IFS
+
+  echo ::debug:: image pushes succeeded!
 fi
 
-echo ::set-output name=image_id::"$(docker image ls "$image" -q)"
+echo ::set-output name=image_id::"$(docker image ls "$image:$tag" -q)"

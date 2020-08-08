@@ -10,4 +10,4 @@ watch: push
 
 .PHONY: push release
 push release:
-	act $@
+	-act $@

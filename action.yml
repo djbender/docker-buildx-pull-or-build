@@ -14,13 +14,16 @@ inputs:
     description: 'The Dockerfile to build when the remote image is not available.'
     required: true
   image:
-    description: 'The image name that this action will either 1) pull 2) build and push.'
+    description: 'The untagged image name that this action will either 1) pull 2) build and push.'
     required: true
   image_cache:
     description: 'Optionally specify an image cache name. Default: `<image>:cache`'
   living_tag:
-    description: "Skip the initial `docker pull` because this tag is not immutable (i.e.: `latest`, `stable-1.0`). Deafult: `'false'`"
+    description: "Skip the initial `docker pull` because this tag is not immutable (i.e.: `latest`, `stable-1.0`). Default: `'false'`"
     default: false
+  tags:
+    description: "A list of comma-separated tags to publish to when the resulting image is created. Example: `'latest,stable-1.0,${{ github.sha }}'`. Default: `'latest'`"
+    default: 'latest'
 
 outputs:
   image_id:
@@ -37,3 +40,4 @@ runs:
     - ${{ inputs.image }}
     - ${{ inputs.image_cache }}
     - ${{ inputs.living_tag }}
+    - ${{ inputs.tags }}
