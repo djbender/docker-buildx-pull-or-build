@@ -21,6 +21,7 @@ inputs:
   living_tag:
     description: "Skip the initial `docker pull` because this tag is not immutable (i.e.: `latest`, `stable-1.0`). Deafult: `'false'`"
     default: false
+  docker_config_json: {}
 
 outputs:
   image_id:
@@ -37,3 +38,4 @@ runs:
     - ${{ inputs.image }}
     - ${{ inputs.image_cache }}
     - ${{ inputs.living_tag }}
+    - ${{ inputs.docker_config_json }}

@@ -12,34 +12,44 @@ default_image_cache="$image:cache"
 image_cache=${6:-$default_image_cache}
 
 living_tag=$7
+docker_config_auth=$8
 
 # act will by default change $HOME to /github/home which
 # is not where the buildx cli-plugin is located
 export DOCKER_CONFIG=/root/.docker
 
-echo ::debug:: Logging in to "${DOCKER_REGISTRY:-Docker Hub}" ...
+echo Logging in to "${DOCKER_REGISTRY:-Docker Hub}" ...
 docker_login_log=mktmp
-echo "$DOCKER_PASSWORD" | docker login \
-  --username "$DOCKER_USERNAME" \
-  --password-stdin "$DOCKER_REGISTRY" > $docker_login_log 2>&1 \
-  \
-  || docker_login_result=$?
+
+if [ "$docker_config_auth" = '' ]; then
+  echo "docker_config_auth was blank so logging in with username and password..."
+  echo "$DOCKER_PASSWORD" | docker login \
+    --username "$DOCKER_USERNAME" \
+    --password-stdin "$DOCKER_REGISTRY" > $docker_login_log 2>&1 \
+    \
+    || docker_login_result=$?
+else
+  echo "Using docker_config_auth to authenticate with registry..."
+  jq --null-input --tab "$docker_config_auth" > /root/.docker/config.json
+  docker login "$DOCKER_REGISTRY" > $docker_login_log 2>&1 \
+    || docker_login_result=$?
+fi
 
 [ ${docker_login_result:-0} = 1 ] && cat $docker_login_log
 rm $docker_login_log
 [ ${docker_login_result:-0} = 1 ] && exit $docker_login_result
-echo ::debug:: Log in succeeded!
+echo Log in succeeded!
 
-echo ::debug:: Creating buildx 'docker-container' builder...
+echo Creating buildx 'docker-container' builder...
 docker buildx create --name builder --driver docker-container --use > /dev/null
 docker buildx install
-echo ::debug:: Builder creation succeeded!
+echo Builder creation succeeded!
 
-echo ::debug:: pulling "$image" ...
+echo Pulling "$image" ...
 if [ "$living_tag" != 'true' ] && docker pull -q "$image" > /dev/null; then
-  echo ::debug:: image fetch succeeded!
+  echo Image fetch succeeded!
 else
-  echo ::debug:: remote image "$image" was not available, starting image build...
+  echo Remote image "$image" was not available, starting image build...
   docker buildx build \
     --cache-from "type=registry,ref=$image_cache" \
     --cache-to "type=registry,ref=$image_cache,mode=max" \
@@ -48,11 +58,13 @@ else
     --progress=plain \
     --tag "$image" \
     "$GITHUB_WORKSPACE"
-  echo ::debug:: image build succeeded!
+  echo Image build succeeded!
 
-  echo ::debug:: pushing image...
+  echo Pushing image...
   docker push "$image"
-  echo ::debug:: image push succeeded!
+  echo Image push succeeded!
 fi
 
-echo ::set-output name=image_id::"$(docker image ls "$image" -q)"
+image_id=$(docker image ls "$image" -q | head -n 1)
+echo "image_id: $image_id"
+echo "::set-output name=image_id::$image_id"
