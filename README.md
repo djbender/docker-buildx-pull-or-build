@@ -1,16 +1,18 @@
 # Docker buildx pull or build action
 
+![Test](https://github.com/djbender/docker-buildx-pull-or-build/workflows/Test/badge.svg)
+
 This action sets up a docker buildx builder, sets it as the default builder, the either pulls an existing image from a remote repository, or builds it with buildx using its new build-cache caching mechanisms. Finally, the resulting image is published.
 
 ## Inputs
 
 ### `docker_username`
 
-**Required** The username to authenticate with the registry.
+The username to authenticate with the registry. Required _if_ `docker_config_json` is blank.
 
 ### `docker_password`
 
-**Required** The password to authenticate with the registry.
+The password to authenticate with the registry. Required _if_ `docker_config_json` is blank.'
 
 ### `docker_registry`
 
@@ -31,6 +33,10 @@ Optionally specify an image cache name. Default: `<image>:cache`
 ### `living_tag`
 
 Optionally skip the initial `docker pull` because this tag is not immutable (i.e.: `latest`, `stable-1.0`). Default: `'false'`"
+
+### `docker_config_json`
+
+Optionally authenticate with existing stored credentials by serializing `~/.docker/config.json`. If present, this will override the `docker_username` and `docker_password` inputs. E.g.: `$(cat ~/.docker/config.json)` or `"{\"auths\":{\"https://index.docker.io/v1/\":{\"auth\":\"SEKRET\"}}}"`.
 
 ## Outputs
 

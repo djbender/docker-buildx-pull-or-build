@@ -3,11 +3,9 @@ description: 'Pull an image or optionally build it with buildx'
 
 inputs:
   docker_username:
-    description: 'The username to authenticate with the registry.'
-    require: true
+    description: 'The username to authenticate with the registry. Required if `docker_config_json` is blank.'
   docker_password:
-    description: 'The password to authenticate with the registry.'
-    require: true
+    description: 'The password to authenticate with the registry. Required if `docker_config_json` is blank.'
   docker_registry:
     decscription: 'The remote registry for pulling and pushing images.'
   dockerfile:
@@ -19,9 +17,10 @@ inputs:
   image_cache:
     description: 'Optionally specify an image cache name. Default: `<image>:cache`'
   living_tag:
-    description: "Skip the initial `docker pull` because this tag is not immutable (i.e.: `latest`, `stable-1.0`). Deafult: `'false'`"
+    description: "Skip the initial `docker pull` because this tag is not immutable (i.e.: `latest`, `stable-1.0`). Default: `'false'`"
     default: false
-  docker_config_json: {}
+  docker_config_json:
+    description: 'Optionally authenticate with existing stored credentials by serializing `~/.docker/config.json`. If present, this will override the `docker_username` and `docker_password` inputs. E.g.: `$(cat ~/.docker/config.json)` or `"{\"auths\":{\"https://index.docker.io/v1/\":{\"auth\":\"SEKRET\"}}}"`.'
 
 outputs:
   image_id:
