@@ -9,7 +9,7 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: Docker Buildx Pull or Build
-        uses: djbender/docker-buildx-pull-or-build@v0.2
+        uses: djbender/docker-buildx-pull-or-build@v0.3
         with:
           docker_username: djbender
           docker_password: ${{ secrets.DOCKER_PASSWORD }}
