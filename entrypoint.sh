@@ -49,7 +49,11 @@ echo Pulling "$image" ...
 if [ "$living_tag" != 'true' ] && docker pull -q "$image" > /dev/null; then
   echo Image fetch succeeded!
 else
-  echo Remote image "$image" was not available, starting image build...
+  if [ "$living_tag" != 'true' ]; then
+    echo Remote image "$image" was not available, starting image build...
+  else
+    echo "\`living_tag\` was true! Skipping \`docker pull\` and starting image build..."
+  fi
   docker buildx build \
     --cache-from "type=registry,ref=$image_cache" \
     --cache-to "type=registry,ref=$image_cache,mode=max" \
