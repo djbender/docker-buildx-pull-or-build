@@ -38,6 +38,10 @@ Optionally skip the initial `docker pull` because this tag is not immutable (i.e
 
 Optionally authenticate with existing stored credentials by serializing `~/.docker/config.json`. If present, this will override the `docker_username` and `docker_password` inputs. E.g.: `$(cat ~/.docker/config.json)` or `"{\"auths\":{\"https://index.docker.io/v1/\":{\"auth\":\"SEKRET\"}}}"`.
 
+### `cache`
+
+Optionally toggle all caching mechanisms. Default: `'true'`
+
 ## Outputs
 
 ### `image_id`
