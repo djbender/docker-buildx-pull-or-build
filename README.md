@@ -46,11 +46,40 @@ The Image ID that has been loaded into the local docker engine
 
 ## Example usage
 
+Basic use case:
+
     - name: Docker Buildx Pull or Build
-      uses: djbender/docker-buildx-pull-or-build@v0.1
+      uses: djbender/docker-buildx-pull-or-build@v0.3
       with:
-        docker_username: djbender
+        docker_username: ${{ env.DOCKER_USERNAME }}
+        docker_password: ${{ secrets.DOCKER_PASSWORD }}
+        dockerfile: test.Dockerfile
+        image: djbender/docker-buildx-pull-or-build-test-dockerfile:latest
+
+Advanced use case:
+
+    - name: Docker Buildx Pull or Build
+      uses: djbender/docker-buildx-pull-or-build@v0.3
+      with:
+        docker_username: ${{ env.DOCKER_USERNAME }}
         docker_password: ${{ secrets.DOCKER_PASSWORD }}
         docker_registry: ${{ env.DOCKER_REGISTRY }}
         dockerfile: test.Dockerfile
-        image: djbender/docker-buildx-pull-or-build-test-dockerfile
+        image: djbender/docker-buildx-pull-or-build-test-dockerfile:latest
+        image_cache: djbender/docker-buildx-pull-or-build-test-dockerfile:cache-tag
+        living_tag: true
+
+Authenticating with .docker/config.json, assuming ~/.docker/config.json is already present via some earlier process:
+
+    - run: |
+        docker_config_json=$(cat ~/.docker/config.json)
+        echo ::add-mask::$docker_config_json
+        echo ::set-env name=DOCKER_CONFIG_JSON::${docker_config_json}
+
+    - name: Docker Buildx Pull or Build
+      uses: djbender/docker-buildx-pull-or-build@v0.3
+      with:
+        docker_config_json: ${{ env.DOCKER_CONFIG_JSON }}
+        docker_registry: ${{ env.DOCKER_REGISTRY }}
+        dockerfile: test.Dockerfile
+        image: djbender/docker-buildx-pull-or-build-test-dockerfile:latest
