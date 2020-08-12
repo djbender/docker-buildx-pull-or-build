@@ -46,11 +46,12 @@ docker buildx create --name builder --driver docker-container --use > /dev/null
 docker buildx install
 echo Builder creation succeeded!
 
-if [ "$living_tag" != 'true' ] && [ "$cache" != 'false' ]; then
-    echo Pulling "$image" ...
-  if docker pull -q "$image" > /dev/null; then
-    echo Image fetch succeeded!
-  fi
+if [ "$living_tag" != 'true' ] \
+  && [ "$cache" != 'false' ] \
+  && echo "Pulling $image..." \
+  && docker pull -q "$image" > /dev/null; then
+
+  echo Image fetch succeeded!
 else
   if [ "$living_tag" = 'true' ]; then
     # shellcheck disable=SC2016
