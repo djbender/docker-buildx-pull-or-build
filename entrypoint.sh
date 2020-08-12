@@ -56,9 +56,9 @@ else
   if [ "$living_tag" = 'true' ]; then
     # shellcheck disable=SC2016
     echo '`living_tag` was true! Skipping `docker pull` and starting image build...'
-  elif [ "$cache" = 'true' ]; then
+  elif [ "$cache" = 'false' ]; then
     # shellcheck disable=SC2016
-    echo '`cache` was true! Skipping all caching mechanisms...'
+    echo '`cache` was false! Skipping all caching mechanisms...'
     no_cache_flags='--pull --no-cache'
   else
     echo Remote image "$image" was not available, starting image build...
