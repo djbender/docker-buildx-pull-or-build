@@ -13,6 +13,7 @@ image_cache=${6:-$default_image_cache}
 
 living_tag=$7
 docker_config_json=$8
+cache=${9:-true}
 
 # act will by default change $HOME to /github/home which
 # is not where the buildx cli-plugin is located
@@ -45,15 +46,25 @@ docker buildx create --name builder --driver docker-container --use > /dev/null
 docker buildx install
 echo Builder creation succeeded!
 
-echo Pulling "$image" ...
-if [ "$living_tag" != 'true' ] && docker pull -q "$image" > /dev/null; then
-  echo Image fetch succeeded!
-else
-  if [ "$living_tag" != 'true' ]; then
-    echo Remote image "$image" was not available, starting image build...
-  else
-    echo "\`living_tag\` was true! Skipping \`docker pull\` and starting image build..."
+if [ "$living_tag" != 'true' ] && [ "$cache" != 'false' ]; then
+    echo Pulling "$image" ...
+  if docker pull -q "$image" > /dev/null; then
+    echo Image fetch succeeded!
   fi
+else
+  if [ "$living_tag" = 'true' ]; then
+    # shellcheck disable=SC2016
+    echo '`living_tag` was true! Skipping `docker pull` and starting image build...'
+  elif [ "$cache" = 'true' ]; then
+    # shellcheck disable=SC2016
+    echo '`cache` was true! Skipping all caching mechanisms...'
+    no_cache_flags='--pull --no-cache'
+  else
+    echo Remote image "$image" was not available, starting image build...
+  fi
+
+  # word splitting is intentional here
+  # shellcheck disable=2086
   docker buildx build \
     --cache-from "type=registry,ref=$image_cache" \
     --cache-to "type=registry,ref=$image_cache,mode=max" \
@@ -61,6 +72,7 @@ else
     --load \
     --progress=plain \
     --tag "$image" \
+    ${no_cache_flags:-} \
     "$GITHUB_WORKSPACE"
   echo Image build succeeded!
 
