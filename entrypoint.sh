@@ -83,5 +83,6 @@ else
 fi
 
 image_id=$(docker image ls "$image" -q | head -n 1)
-echo "image_id: $image_id"
+# if $image failed to pull or build, fail this script
+[ "$image" = '' ] && exit 1
 echo "::set-output name=image_id::$image_id"
