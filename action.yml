@@ -24,6 +24,7 @@ inputs:
   cache:
     description: "Optionally toggle all caching mechanisms. Default: `'true'`"
     default: true
+  tags: {}
 
 outputs:
   image_id:
@@ -42,3 +43,4 @@ runs:
     - ${{ inputs.living_tag }}
     - ${{ inputs.docker_config_json }}
     - ${{ inputs.cache }}
+    - ${{ inputs.tags }}

@@ -13,7 +13,8 @@ jobs:
         with:
           docker_username: djbender
           docker_password: ${{ secrets.DOCKER_PASSWORD }}
-          image: djbender/docker-buildx-pull-or-build-test-dockerfile:latest
+          image: djbender/docker-buildx-pull-or-build-test-dockerfile
+          tags: latest
           image_cache: djbender/docker-buildx-pull-or-build-test-dockerfile:cache
           dockerfile: test.Dockerfile
 
@@ -27,7 +28,8 @@ jobs:
         with:
           docker_username: djbender
           docker_password: ${{ secrets.DOCKER_PASSWORD }}
-          image: djbender/docker-buildx-pull-or-build-test-dockerfile:living-tag-1
+          image: djbender/docker-buildx-pull-or-build-test-dockerfile
+          tags: living-tag-1
           image_cache: djbender/docker-buildx-pull-or-build-test-dockerfile:living-tag-cache
           dockerfile: test.Dockerfile
           living_tag: true
@@ -37,7 +39,8 @@ jobs:
         with:
           docker_username: djbender
           docker_password: ${{ secrets.DOCKER_PASSWORD }}
-          image: djbender/docker-buildx-pull-or-build-test-dockerfile:living-tag-2
+          image: djbender/docker-buildx-pull-or-build-test-dockerfile
+          tags: living-tag-2
           image_cache: djbender/docker-buildx-pull-or-build-test-dockerfile:living-tag-cache
           dockerfile: test.Dockerfile
           living_tag: false
@@ -47,7 +50,8 @@ jobs:
         with:
           docker_username: djbender
           docker_password: ${{ secrets.DOCKER_PASSWORD }}
-          image: djbender/docker-buildx-pull-or-build-test-dockerfile:living-tag-3
+          image: djbender/docker-buildx-pull-or-build-test-dockerfile
+          tags: living-tag-3
           image_cache: djbender/docker-buildx-pull-or-build-test-dockerfile:living-tag-cache
           dockerfile: test.Dockerfile
 
@@ -64,7 +68,8 @@ jobs:
       - name: Run action
         uses: ./
         with:
-          image: djbender/docker-buildx-pull-or-build-test-dockerfile:latest
+          image: djbender/docker-buildx-pull-or-build-test-dockerfile
+          tags: latest
           image_cache: djbender/docker-buildx-pull-or-build-test-dockerfile:cache
           dockerfile: test.Dockerfile
           docker_config_json: ${{ env.GITHUB_CONFIG_JSON }}
@@ -79,7 +84,8 @@ jobs:
         with:
           docker_username: djbender
           docker_password: ${{ secrets.DOCKER_PASSWORD }}
-          image: djbender/docker-buildx-pull-or-build-test-dockerfile:latest
+          image: djbender/docker-buildx-pull-or-build-test-dockerfile
+          tags: latest
           image_cache: djbender/docker-buildx-pull-or-build-test-dockerfile:cache
           dockerfile: test.Dockerfile
           cache: false
@@ -89,7 +95,29 @@ jobs:
         with:
           docker_username: djbender
           docker_password: ${{ secrets.DOCKER_PASSWORD }}
-          image: djbender/docker-buildx-pull-or-build-test-dockerfile:latest
+          image: djbender/docker-buildx-pull-or-build-test-dockerfile
+          tags: latest
           image_cache: djbender/docker-buildx-pull-or-build-test-dockerfile:cache
           dockerfile: test.Dockerfile
           cache: true
+
+  multiple_tags:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Run action
+        uses: ./
+        with:
+          docker_username: djbender
+          docker_password: ${{ secrets.DOCKER_PASSWORD }}
+          image: djbender/docker-buildx-pull-or-build-test-dockerfile
+          tags: tag-1,tag-2,tag-3
+          image_cache: djbender/docker-buildx-pull-or-build-test-dockerfile:cache
+          dockerfile: test.Dockerfile
+          cache: false
+
+      - run: |
+          docker inspect djbender/docker-buildx-pull-or-build-test-dockerfile:tag-1 > /dev/null
+          docker inspect djbender/docker-buildx-pull-or-build-test-dockerfile:tag-2 > /dev/null
+          docker inspect djbender/docker-buildx-pull-or-build-test-dockerfile:tag-3 > /dev/null

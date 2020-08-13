@@ -14,6 +14,7 @@ image_cache=${6:-$default_image_cache}
 living_tag=$7
 docker_config_json=$8
 cache=${9:-true}
+tags=${10}
 
 # act will by default change $HOME to /github/home which
 # is not where the buildx cli-plugin is located
@@ -46,10 +47,16 @@ docker buildx create --name builder --driver docker-container --use > /dev/null
 docker buildx install
 echo Builder creation succeeded!
 
+first_tag=''
+IFS=,
+for first_tag in $tags; do break; done # POSIX way to fetch first element
+echo "Only the first tag is checked for existence in registry: $first_tag"
+unset IFS
+
 if [ "$living_tag" != 'true' ] \
   && [ "$cache" != 'false' ] \
-  && echo "Pulling $image..." \
-  && docker pull -q "$image" > /dev/null; then
+  && echo "Pulling $image:$first_tag..." \
+  && docker pull -q "$image:$first_tag" > /dev/null; then
 
   echo Image fetch succeeded!
 else
@@ -61,7 +68,7 @@ else
     echo '`cache` was false! Skipping all caching mechanisms...'
     no_cache_flags='--pull --no-cache'
   else
-    echo Remote image "$image" was not available, starting image build...
+    echo Remote image "$image:$first_tag" was not available, starting image build...
   fi
 
   # word splitting is intentional here
@@ -72,17 +79,23 @@ else
     --file "$dockerfile" \
     --load \
     --progress=plain \
-    --tag "$image" \
+    --tag "$image:$first_tag" \
     ${no_cache_flags:-} \
     "$GITHUB_WORKSPACE"
   echo Image build succeeded!
 
-  echo Pushing image...
-  docker push "$image"
-  echo Image push succeeded!
+  IFS=,
+  for tag in $tags; do
+    docker tag "$image:$first_tag" "$image:$tag"
+    echo Pushing image... "$image:$tag"
+    docker push "$image:$tag"
+    echo "Image push succeeded! [$image:$tag]"
+  done
+  unset IFS
+
 fi
 
-image_id=$(docker image ls "$image" -q | head -n 1)
-# if $image failed to pull or build, fail this script
-[ "$image" = '' ] && exit 1
+image_id=$(docker image ls "$image:$first_tag" -q | head -n 1)
+# if $image:$first_tag failed to pull or build, fail this script
+[ "$image_id" = '' ] && exit 1
 echo "::set-output name=image_id::$image_id"
