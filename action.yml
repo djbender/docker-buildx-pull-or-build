@@ -2,12 +2,12 @@ name: 'Docker Buildx Pull or Build'
 description: 'Pull an image or optionally build it with buildx'
 
 inputs:
-  docker_username:
-    description: 'The username to authenticate with the registry. Required if `docker_config_json` is blank.'
   docker_password:
     description: 'The password to authenticate with the registry. Required if `docker_config_json` is blank.'
   docker_registry:
     decscription: 'The remote registry for pulling and pushing images.'
+  docker_username:
+    description: 'The username to authenticate with the registry. Required if `docker_config_json` is blank.'
   dockerfile:
     description: 'The Dockerfile to build when the remote image is not available.'
     required: true
@@ -24,6 +24,8 @@ inputs:
   cache:
     description: "Optionally toggle all caching mechanisms. Default: `'true'`"
     default: true
+  build_args:
+    description: "Optionally pass in comma-separated build args. Default: `''`"
 
 outputs:
   image_id:
@@ -42,3 +44,4 @@ runs:
     - ${{ inputs.living_tag }}
     - ${{ inputs.docker_config_json }}
     - ${{ inputs.cache }}
+    - ${{ inputs.build_args }}

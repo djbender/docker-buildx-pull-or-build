@@ -15,6 +15,11 @@ living_tag=$7
 docker_config_json=$8
 cache=${9:-true}
 
+build_args=${10}
+
+# ensure that we're not supplying extra parameters
+[ -n "${11}" ] && echo "unexpected parameter ${11}" && exit 2
+
 # act will by default change $HOME to /github/home which
 # is not where the buildx cli-plugin is located
 export DOCKER_CONFIG=/root/.docker
@@ -64,6 +69,13 @@ else
     echo Remote image "$image" was not available, starting image build...
   fi
 
+  build_arg_flags=''
+  IFS=','
+  for build_arg in $build_args; do
+    build_arg_flags="${build_arg_flags} --build-arg $build_arg"
+  done
+  unset IFS
+
   # word splitting is intentional here
   # shellcheck disable=2086
   docker buildx build \
@@ -74,6 +86,7 @@ else
     --progress=plain \
     --tag "$image" \
     ${no_cache_flags:-} \
+    ${build_arg_flags:-} \
     "$GITHUB_WORKSPACE"
   echo Image build succeeded!
 

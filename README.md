@@ -42,6 +42,10 @@ Optionally authenticate with existing stored credentials by serializing `~/.dock
 
 Optionally toggle all caching mechanisms. Default: `'true'`
 
+### `build_args`
+
+Optionally add comma-separated build arg to be individual passed to the build command. Default: `''`
+
 ## Outputs
 
 ### `image_id`
@@ -72,6 +76,7 @@ Advanced use case:
         image: djbender/docker-buildx-pull-or-build-test-dockerfile:latest
         image_cache: djbender/docker-buildx-pull-or-build-test-dockerfile:cache-tag
         living_tag: true
+        build_args: "FOO=hello,BAR=world,BAZ=yeet"
 
 Authenticating with .docker/config.json, assuming ~/.docker/config.json is already present via some earlier process:
 

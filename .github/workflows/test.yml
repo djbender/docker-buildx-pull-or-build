@@ -93,3 +93,52 @@ jobs:
           image_cache: djbender/docker-buildx-pull-or-build-test-dockerfile:cache
           dockerfile: test.Dockerfile
           cache: true
+
+  build-args:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Run action with no build args
+        uses: ./
+        with:
+          docker_username: djbender
+          docker_password: ${{ secrets.DOCKER_PASSWORD }}
+          image: djbender/docker-buildx-pull-or-build-test-dockerfile:latest
+          image_cache: djbender/docker-buildx-pull-or-build-test-dockerfile:cache
+          dockerfile: test.Dockerfile
+          living_tag: true
+
+      - name: Assert output
+        run: |
+          test "$(docker run --rm djbender/docker-buildx-pull-or-build-test-dockerfile:latest)" = 'Hello World'
+
+      - name: Run action with one build args
+        uses: ./
+        with:
+          docker_username: djbender
+          docker_password: ${{ secrets.DOCKER_PASSWORD }}
+          image: djbender/docker-buildx-pull-or-build-test-dockerfile:latest
+          image_cache: djbender/docker-buildx-pull-or-build-test-dockerfile:cache
+          dockerfile: test.Dockerfile
+          build_args: FOO=foo
+          living_tag: true
+
+      - name: Assert output
+        run: |
+          test "$(docker run --rm djbender/docker-buildx-pull-or-build-test-dockerfile:latest)" = 'foo World'
+
+      - name: Run action with multiple (3) build args
+        uses: ./
+        with:
+          docker_username: djbender
+          docker_password: ${{ secrets.DOCKER_PASSWORD }}
+          image: djbender/docker-buildx-pull-or-build-test-dockerfile:latest
+          image_cache: djbender/docker-buildx-pull-or-build-test-dockerfile:cache
+          dockerfile: test.Dockerfile
+          build_args: FOO=foo,BAR=bar,BAZ=baz
+          living_tag: true
+
+      - name: Assert output
+        run: |
+          test "$(docker run --rm djbender/docker-buildx-pull-or-build-test-dockerfile:latest)" = 'foo bar baz'

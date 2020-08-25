@@ -1,3 +1,4 @@
--P ubuntu-latest=djbender/act-environments-ubuntu:18.04
+-P ubuntu-latest=djbender/act-environments-ubuntu:18.04-docker
 --env-file .test.env
 --secret-file .test.secrets
+push
